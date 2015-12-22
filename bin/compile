@@ -1,0 +1,18 @@
+#!/bin/bash
+
+RECIPE="$1"
+PREFIX="$2"
+SOURCE="/opt/buildcurl"
+LOGGER=$(mktemp)
+
+mkdir -p "$PREFIX"
+if [ -f  "$SOURCE/recipes/$RECIPE" ]; then
+	if $SOURCE/recipes/$RECIPE "$PREFIX" &> $LOGGER ; then
+		tar czf - -C "$PREFIX" .
+	else
+		echo "Error while compiling:"
+		cat $LOGGER
+	fi
+else
+	echo "UNSUPPORTED RECIPE: $RECIPE"
+fi

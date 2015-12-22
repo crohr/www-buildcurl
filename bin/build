@@ -1,12 +1,24 @@
 #!/usr/bin/env ruby
-require 'json'
+require 'time'
 require 'cgi'
+require 'tempfile'
+require 'fileutils'
 
+tmpdir = Dir.mktmpdir
 cgi = CGI.new
 params = cgi.params
-p params
 
+recipe = File.basename(params["component"].first)
+version = params["version"].first
+prefix = params.has_key?("prefix") ? params["prefix"].first : "/app/.heroku/#{recipe}"
+cmd = "env VERSION='#{version}' /opt/buildcurl/bin/compile '#{recipe}' '#{prefix}'"
 
-cgi.out("status" => "OK", "type" => "text/plain", "connection" => "close") do
-  "Success"
+Dir.chdir tmpdir
+cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
+IO.popen(cmd) do |io|
+  until io.eof?
+  data = io.gets
+  cgi.print data
+  end
 end
+FileUtils.rm_rf tmpdir
