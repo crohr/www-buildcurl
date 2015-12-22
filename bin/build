@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'json'
+require 'cgi'
+
+cgi = CGI.new
+params = cgi.params
+p params
+
+
+cgi.out("status" => "OK", "type" => "text/plain", "connection" => "close") do
+  "Success"
+end
