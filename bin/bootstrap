@@ -1,17 +1,10 @@
 #!/bin/bash
 # Use this script to generate the base docker images
 
+set -ex
+
+export DOCKER_ORG=${DOCKER_ORG:=buildcurl}
+
+MAX_CPUS=${MAX_CPUS:=$(getconf _NPROCESSORS_ONLN)}
 TARGETS=${TARGETS:="*"}
-DOCKER_ORG=${DOCKER_ORG:=buildcurl}
-
-for file in $(find targets/$TARGETS -name Dockerfile); do
-	osversiondir=$(dirname $file)
-	osfamilydir=$(dirname $osversiondir)
-	osversion=$(basename $osversiondir)
-	osfamily=$(basename $osfamilydir)
-	target="$osfamily:$osversion"
-	docker_tag="$DOCKER_ORG/$osfamily:$osversion"
-
-	echo $docker_tag
-	docker build -t $DOCKER_ORG/$osfamily:$osversion $osversiondir
-done
+find targets/$TARGETS -name Dockerfile | xargs --max-args=1 --max-procs=$MAX_CPUS ./targets/dockerize
