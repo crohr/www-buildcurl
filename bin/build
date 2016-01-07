@@ -1,24 +1,53 @@
-#!/usr/bin/env ruby
-require 'time'
-require 'cgi'
-require 'tempfile'
-require 'fileutils'
+#!/bin/bash
 
-tmpdir = Dir.mktmpdir
-cgi = CGI.new
-params = cgi.params
+contains_element() {
+	local e
+	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+	return 1
+}
 
-recipe = File.basename(params["component"].first)
-version = params["version"].first
-prefix = params.has_key?("prefix") ? params["prefix"].first : "/app/.heroku/#{recipe}"
-cmd = "env VERSION='#{version}' /opt/buildcurl/bin/compile '#{recipe}' '#{prefix}'"
+DOCKER_ORG=${DOCKER_ORG:=buildcurl}
+SOURCE=${SOURCE:="/opt/buildcurl"}
+ALLOWED_TARGETS=(
+	el:6
+	el:7
+	debian:7
+	debian:8
+	ubuntu:12.04
+	ubuntu:14.04
+	fedora:20
+	sles:11
+	sles:12
+)
+TARGET="$1"
+RECIPE="$2"
 
-Dir.chdir tmpdir
-cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
-IO.popen(cmd) do |io|
-  until io.eof?
-  data = io.gets
-  cgi.print data
-  end
-end
-FileUtils.rm_rf tmpdir
+if ! contains_element "$TARGET" "${ALLOWED_TARGETS[@]}" ; then
+	echo "Unknown target: '${TARGET}'. Aborting"
+	exit 2
+fi
+
+if [ -z "$RECIPE" ]; then
+	echo "No recipe given. Aborting"
+	exit 2
+fi
+
+if ! test -f $SOURCE/recipes/$RECIPE ; then
+	echo "Unknown recipe: '$RECIPE'. Aborting"
+	exit 2
+fi
+
+if [ -z "$PREFIX" ]; then
+	PREFIX=/usr/local
+fi
+
+exec docker run -a stdout -a stderr \
+	-e PREFIX="$PREFIX" \
+	-e LOGGER="$LOGGER" \
+       	-e SOURCE=/buildcurl \
+	-e VERSION="$VERSION" \
+	-e BUILDCURL_URL="$BUILDCURL_URL" \
+	-v $SOURCE:/buildcurl:ro \
+	-w /tmp \
+	"$DOCKER_ORG/$TARGET" \
+	/buildcurl/bin/compile "$RECIPE"

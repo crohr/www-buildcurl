@@ -1,18 +1,24 @@
 #!/bin/bash
 
 RECIPE="$1"
-PREFIX="$2"
-SOURCE="/opt/buildcurl"
-LOGGER=$(mktemp)
+PREFIX=${PREFIX:="/usr/local"}
+SOURCE=${SOURCE:="/opt/buildcurl"}
+PATH=$SOURCE/helpers:$PATH
 
-mkdir -p "$PREFIX"
+if [ -z "$LOGGER" ]; then LOGGER=$(mktemp) ; fi
+
+rm -rf "$PREFIX" && mkdir -p "$PREFIX"
 if [ -f  "$SOURCE/recipes/$RECIPE" ]; then
 	if $SOURCE/recipes/$RECIPE "$PREFIX" &> $LOGGER ; then
 		tar czf - -C "$PREFIX" .
 	else
-		echo "Error while compiling:"
-		cat $LOGGER
+		if [ -f $LOGGER ] ; then
+			echo "Error while compiling:"
+			cat $LOGGER
+		fi
+		exit 1
 	fi
 else
 	echo "UNSUPPORTED RECIPE: $RECIPE"
+	exit 2
 fi

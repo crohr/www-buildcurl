@@ -1,0 +1,17 @@
+#!/bin/bash
+# Use this script to generate the base docker images
+
+TARGETS=${TARGETS:="*"}
+DOCKER_ORG=${DOCKER_ORG:=buildcurl}
+
+for file in $(find targets/$TARGETS -name Dockerfile); do
+	osversiondir=$(dirname $file)
+	osfamilydir=$(dirname $osversiondir)
+	osversion=$(basename $osversiondir)
+	osfamily=$(basename $osfamilydir)
+	target="$osfamily:$osversion"
+	docker_tag="$DOCKER_ORG/$osfamily:$osversion"
+
+	echo $docker_tag
+	docker build -t $DOCKER_ORG/$osfamily:$osversion $osversiondir
+done

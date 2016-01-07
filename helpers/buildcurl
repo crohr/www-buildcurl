@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -ex
+
+$BUILDCURL_URL=${BUILDCURL_URL:=http://buildcurl.com/build}
+
+exec curl -sSL $BUILDCURL_URL -X POST \
+	-d "target=$(cat /etc/version)" \
+	-d "prefix=$PREFIX" \
+	-d "recipe=$1" \
+	-d "version=$2"

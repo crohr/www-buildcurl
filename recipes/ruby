@@ -1,0 +1,41 @@
+#!/bin/bash
+
+OUT_PREFIX=$1
+
+# fail hard
+set -o pipefail
+# fail harder
+set -eux
+
+DEFAULT_VERSION="2.0.0"
+dep_version=${VERSION:-$DEFAULT_VERSION}
+full_name="ruby-$dep_version"
+version="${dep_version/-*/}"
+name="ruby-$version"
+major_ruby="$(echo $version | grep -Po '^\d.\d')"
+filename="$name.tgz"
+
+dep_dirname=ruby-${dep_version}
+dep_archive_name=${dep_dirname}.tar.gz
+dep_url=http://ftp.ruby-lang.org/pub/ruby/${major_ruby}/${dep_archive_name}
+
+echo "-----> Building Ruby ${dep_version}..."
+
+buildcurl libyaml 0.1.6 | tar xz -C $OUT_PREFIX
+buildcurl libffi 3.2.1 | tar xz -C $OUT_PREFIX
+curl -L ${dep_url} | tar xz
+
+pushd ${dep_dirname}
+./configure \
+    --prefix=${OUT_PREFIX} \
+    --debugflags="-g" \
+    --disable-install-doc \
+    --enable-load-relative
+env CPATH=$OUT_PREFIX/include:$CPATH \
+	CPPATH=$OUT_PREFIX/include:$CPPATH \
+	LIBRARY_PATH=$OUT_PREFIX/lib:$LIBRARY_PATH \
+	make -s -j 9
+make install -s
+popd
+
+echo "-----> Done."
