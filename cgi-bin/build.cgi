@@ -3,12 +3,18 @@ require 'time'
 require 'cgi'
 require 'tempfile'
 require 'fileutils'
+require 'digest/sha1'
 
 require 'cgi'
 
 SOURCE = ENV.fetch('SOURCE') { File.dirname(Dir.pwd) }
+File.read(File.join(SOURCE, ".env")).each_line do |line|
+  k, v = line.chomp.split("=", 2)
+  ENV[k] = v
+end
+CACHE_DIR = ENV.fetch('CACHE_DIR') { File.join(SOURCE, "cache") }
+FileUtils.mkdir_p CACHE_DIR
 
-tmpdir = Dir.mktmpdir
 cgi = CGI.new
 params = cgi.params
 
@@ -26,15 +32,29 @@ elsif target.nil? || target.empty?
     "Invalid target '#{target}'\n"
   end
 else
-  cmd = "env SOURCE=#{SOURCE} VERSION='#{version}' PREFIX='#{prefix}' #{SOURCE}/bin/build '#{target}' '#{recipe}'"
+  cmd = "env BUILDCURL_URL=#{ENV['BUILDCURL_URL']} SOURCE=#{SOURCE} VERSION='#{version}' PREFIX='#{prefix}' #{SOURCE}/bin/build '#{target}' '#{recipe}'"
+  fingerprint = Digest::SHA1.hexdigest [target, recipe, version, prefix].join("|")
+  cache_file = File.join(CACHE_DIR, fingerprint)
 
-  Dir.chdir tmpdir
-  cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
-  IO.popen(cmd) do |io|
-    until io.eof?
-    data = io.gets
-    cgi.print data
+  if File.exist?(cache_file)
+    cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
+    File.open(cache_file, "r").each_line do |line|
+      cgi.print line
+    end
+  else
+    tmpfile = Tempfile.new("binary")
+    Dir.mktmpdir do
+      cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
+      IO.popen(cmd) do |io|
+        until io.eof?
+          data = io.gets
+          cgi.print data
+          tmpfile.print data
+        end
+      end
+      if $?.exitstatus == 0
+        FileUtils.mv tmpfile.path, cache_file
+      end
     end
   end
-  FileUtils.rm_rf tmpdir
 end

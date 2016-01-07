@@ -5,7 +5,7 @@ OUT_PREFIX=$1
 # fail hard
 set -o pipefail
 # fail harder
-set -eux
+set -ex
 
 DEFAULT_VERSION="2.0.0"
 dep_version=${VERSION:-$DEFAULT_VERSION}
@@ -26,12 +26,11 @@ buildcurl libffi 3.2.1 | tar xz -C $OUT_PREFIX
 curl -L ${dep_url} | tar xz
 
 pushd ${dep_dirname}
-./configure \
+debugflags="-g" ./configure \
     --prefix=${OUT_PREFIX} \
-    --debugflags="-g" \
     --disable-install-doc \
     --enable-load-relative
-env CPATH=$OUT_PREFIX/include:$CPATH \
+CPATH=$OUT_PREFIX/include:$CPATH \
 	CPPATH=$OUT_PREFIX/include:$CPPATH \
 	LIBRARY_PATH=$OUT_PREFIX/lib:$LIBRARY_PATH \
 	make -s -j 9

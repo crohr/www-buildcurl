@@ -1,0 +1,22 @@
+#!/bin/bash
+
+OUT_PREFIX=$1
+
+# fail hard
+set -o pipefail
+# fail harder
+set -eux
+
+echo "Building libyaml ${VERSION}..."
+
+tmpdir=$(mktemp -d)
+
+pushd $tmpdir
+curl -s "http://pyyaml.org/download/libyaml/yaml-${VERSION}.tar.gz" -o - | tar xzf - --strip-components=1
+env CFLAGS=-fPIC ./configure --enable-static --disable-shared --prefix=${OUT_PREFIX}
+make
+make install
+popd
+rm -rf $tmpdir
+
+echo "----> Done."
