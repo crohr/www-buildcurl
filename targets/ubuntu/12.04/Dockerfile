@@ -1,6 +1,6 @@
-from debian:7
+FROM ubuntu:12.04
 
-RUN apt-get update -qq && apt-get -y install \
+RUN apt-get -qq update && apt-get -y install \
   git \
   wget \
   lsb-release \
@@ -18,4 +18,4 @@ RUN apt-get update -qq && apt-get -y install \
   subversion zip coreutils tar autoconf \
   && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN echo "debian:7" > /etc/version
+RUN echo "ubuntu:12.04" > /etc/version

@@ -1,9 +1,10 @@
-from debian:7
+FROM ubuntu:14.04
 
-RUN apt-get update -qq && apt-get -y install \
+RUN apt-get -qq update && apt-get install -y \
   git \
   wget \
   lsb-release \
+  python \
   curl \
   libssl1.0.0 \
   libmysqlclient-dev \
@@ -18,4 +19,4 @@ RUN apt-get update -qq && apt-get -y install \
   subversion zip coreutils tar autoconf \
   && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN echo "debian:7" > /etc/version
+RUN echo "ubuntu:14.04" > /etc/version

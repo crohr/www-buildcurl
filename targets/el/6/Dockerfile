@@ -1,11 +1,7 @@
 FROM centos:6
 
-RUN yum makecache fast
-
-RUN yum -y install \
+RUN yum makecache fast && yum -y install \
   git \
-  vim \
-  sudo \
   wget \
   curl \
   tar \
