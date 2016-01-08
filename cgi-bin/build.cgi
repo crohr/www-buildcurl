@@ -21,7 +21,7 @@ params = cgi.params
 recipe = File.basename(params["recipe"].first || "")
 version = params["version"].first
 target = params["target"].first
-prefix = params.has_key?("prefix") ? params["prefix"].first : "/app/.heroku/#{recipe}"
+prefix = params.has_key?("prefix") ? params["prefix"].first : "/usr/local"
 
 if recipe.nil? || recipe.empty?
   cgi.out("status" => 400) do
@@ -33,6 +33,7 @@ elsif target.nil? || target.empty?
   end
 else
   cmd = "env BUILDCURL_URL=#{ENV['BUILDCURL_URL']} SOURCE=#{SOURCE} VERSION='#{version}' PREFIX='#{prefix}' #{SOURCE}/bin/build '#{target}' '#{recipe}'"
+  # TODO: include md5sum of recipe file in fingerprint
   fingerprint = Digest::SHA1.hexdigest [target, recipe, version, prefix].join("|")
   cache_file = File.join(CACHE_DIR, fingerprint)
 

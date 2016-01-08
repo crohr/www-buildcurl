@@ -11,9 +11,9 @@ rm -f /etc/apache2/sites-enabled/*.conf
 
 cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
 <VirtualHost *:80>
-	ScriptAlias /bin/ /opt/buildcurl/bin/
+	ScriptAlias / /opt/buildcurl/cgi-bin/build.cgi
 
-	<Directory /opt/buildcurl/bin/>
+	<Directory /opt/buildcurl/cgi-bin/>
 		Require all granted
 	</Directory>
 </VirtualHost>
