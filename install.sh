@@ -7,6 +7,7 @@ apt-get update -qq
 apt-get install -y ruby apache2 curl linux-image-extra-$(uname -r)
 apt-get install -y docker-engine
 a2enmod cgi
+usermod -aG docker www-data
 rm -f /etc/apache2/sites-enabled/*.conf
 
 cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
