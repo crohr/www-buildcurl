@@ -12,7 +12,7 @@ usermod -aG docker www-data
 
 mkdir -p /opt
 test -d /opt/buildcurl || git clone https://github.com/crohr/buildcurl.git /opt/buildcurl
-chown -R ubuntu:ubuntu /opt/buildcurl
+chown -R www-data:www-data /opt/buildcurl
 mkdir /opt/buildcurl/cache
 chmod 2777 /opt/buildcurl/cache
 
