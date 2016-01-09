@@ -33,7 +33,7 @@ debugflags="-g" ./configure \
 CPATH=$OUT_PREFIX/include:$CPATH \
 	CPPATH=$OUT_PREFIX/include:$CPPATH \
 	LIBRARY_PATH=$OUT_PREFIX/lib:$LIBRARY_PATH \
-	make -s -j 9
+	make -s -j ${JOBS:=1}
 make install -s
 popd
 
