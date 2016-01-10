@@ -2,10 +2,8 @@
 
 OUT_PREFIX=$1
 
-# fail hard
+set -e
 set -o pipefail
-# fail harder
-set -ex
 
 DEFAULT_VERSION="2.0.0-p648"
 dep_version=${VERSION:-$DEFAULT_VERSION}

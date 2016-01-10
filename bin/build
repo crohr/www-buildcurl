@@ -43,7 +43,7 @@ fi
 
 MAX_CPUS=$(getconf _NPROCESSORS_ONLN)
 
-exec docker run -a stdout -a stderr \
+exec docker run --rm -a stdout -a stderr \
 	-e JOBS="$MAX_CPUS" \
 	-e PREFIX="$PREFIX" \
 	-e LOGGER="$LOGGER" \

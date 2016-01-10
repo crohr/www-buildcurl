@@ -45,16 +45,24 @@ else
   else
     tmpfile = Tempfile.new("binary")
     Dir.mktmpdir do
-      cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
       IO.popen(cmd) do |io|
         until io.eof?
           data = io.gets
-          cgi.print data
           tmpfile.print data
         end
       end
-      if $?.exitstatus == 0
-        FileUtils.mv tmpfile.path, cache_file
+    end
+    tmpfile.rewind
+    if $?.exitstatus == 0
+      FileUtils.mv tmpfile.path, cache_file
+      cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
+      File.open(cache_file, "r").each_line do |line|
+        cgi.print line
+      end
+    else
+      cgi.print cgi.header({"type" => "text/plain", "status" => 500})
+      tmpfile.each_line do |line|
+        cgi.print line
       end
     end
   end

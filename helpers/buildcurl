@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -ex
+set -e
 
-BUILDCURL_URL=${BUILDCURL_URL:=http://buildcurl.com/build}
+BUILDCURL_URL=${BUILDCURL_URL:=http://buildcurl.com/}
 
 exec curl -sSL $BUILDCURL_URL -X POST \
 	-d "target=$(cat /etc/version)" \

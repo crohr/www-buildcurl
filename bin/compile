@@ -13,7 +13,7 @@ if [ -f  "$SOURCE/recipes/$RECIPE" ]; then
 		tar czf - -C "$PREFIX" .
 	else
 		if [ -f $LOGGER ] ; then
-			echo "Error while compiling:"
+			echo "-----> BUILD FAILED, please see the details below:"
 			cat $LOGGER
 		fi
 		exit 1

@@ -3,9 +3,7 @@
 
 OUT_PREFIX=$1
 
-# fail hard
 set -o pipefail
-# fail harder
 set -eux
 
 DEFAULT_VERSION="1.6.0"
@@ -38,7 +36,7 @@ VAR=${OUT_PREFIX}/var
     --with-http_realip_module \
     --with-pcre=pcre-8.37 \
     --with-zlib=zlib-1.2.8
-make -s -j 9
+make -s -j ${JOBS:=1}
 make install -s
 # this doesn't get created
 mkdir -p ${VAR}/run/nginx

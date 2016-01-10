@@ -20,6 +20,7 @@ rm -f /etc/apache2/sites-enabled/*.conf
 
 cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
 <VirtualHost *:80>
+	TimeOut 900
 	ScriptAlias / /opt/buildcurl/cgi-bin/build.cgi
 
 	<Directory /opt/buildcurl/cgi-bin/>
