@@ -13,10 +13,22 @@ RUN yum makecache fast && yum -y install \
   postgresql-devel \
   mysql-devel \
   sqlite-devel \
-  gcc gcc-c++ kernel-devel \
+  gcc \
+  gcc-c++ \
+  kernel-devel \
   cmake make \
-  ruby \
-  autoconf subversion zip file patch \
+  autoconf \
+  subversion \
+  zip \
+  file \
+  patch \
+  bzip2-devel \
+  libpng-devel \
+  libjpeg-devel \
+  freetype-devel \
+  automake \
+  libtool \
+  curl-devel \
   && yum clean all
 
 RUN echo "el:7" > /etc/version

@@ -19,6 +19,10 @@ RUN apt-get update -qq && apt-get install -y \
 	tar \
 	build-essential \
 	autoconf \
+	libbz2-dev \
+	libpng-dev \
+	libjpeg-dev \
+	libfreetype6-dev \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN echo "debian:8" > /etc/version
