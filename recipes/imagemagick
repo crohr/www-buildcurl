@@ -16,7 +16,7 @@ dep_url=http://www.imagemagick.org/download/releases/${dep_archive_name}
 
 echo "-----> Building ImageMagick ${dep_version}..."
 
-curl -L ${dep_url} | tar x
+curl -L ${dep_url} | tar xJ
 
 pushd ${dep_dirname}
 ./configure --prefix=${OUT_PREFIX}
