@@ -13,6 +13,8 @@ File.read(File.join(SOURCE, ".env")).each_line do |line|
   ENV[k] = v
 end
 CACHE_DIR = ENV.fetch('CACHE_DIR') { File.join(SOURCE, "cache") }
+RECIPES_DIR = File.join(SOURCE, "recipes")
+
 FileUtils.mkdir_p CACHE_DIR
 
 cgi = CGI.new
@@ -22,8 +24,9 @@ recipe = File.basename(params["recipe"].first || "")
 version = params["version"].first
 target = params["target"].first
 prefix = params.has_key?("prefix") ? params["prefix"].first : "/usr/local"
+recipe_file = File.join(RECIPES_DIR, recipe)
 
-if recipe.nil? || recipe.empty?
+if recipe.nil? || recipe.empty? || !File.exists?(recipe_file)
   cgi.out("status" => 400) do
     "Invalid recipe '#{recipe}'\n"
   end
@@ -34,7 +37,13 @@ elsif target.nil? || target.empty?
 else
   cmd = "env BUILDCURL_URL=#{ENV['BUILDCURL_URL']} SOURCE=#{SOURCE} VERSION='#{version}' PREFIX='#{prefix}' #{SOURCE}/bin/build '#{target}' '#{recipe}'"
   # TODO: include md5sum of recipe file in fingerprint
-  fingerprint = Digest::SHA1.hexdigest [target, recipe, version, prefix].join("|")
+  fingerprint = Digest::SHA1.hexdigest [
+    target,
+    recipe,
+    Digest::SHA1.hexdigest(File.read(recipe_file)),
+    version,
+    prefix
+  ].join("|")
   cache_file = File.join(CACHE_DIR, fingerprint)
 
   if File.exist?(cache_file)
