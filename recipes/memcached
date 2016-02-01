@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+OUT_PREFIX=$1
+
+set -o pipefail
+set -eux
+
+DEFAULT_VERSION="1.4.25"
+dep_version=${VERSION:-$DEFAULT_VERSION}
+dep_dirname=memcached-${dep_version}
+dep_archive_name=${dep_dirname}.tar.gz
+dep_url=http://memcached.org/files/${dep_archive_name}
+
+echo "-----> Building Memcached ${dep_version}..."
+
+curl -L ${dep_url} | tar xz
+
+pushd ${dep_dirname}
+./configure \
+    --prefix=${OUT_PREFIX}
+make -s -j ${JOBS:=1}
+make install -s
+popd
+
+rm -rf $OUT_PREFIX/share
+
+echo "-----> Done."
