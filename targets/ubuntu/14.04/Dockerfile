@@ -9,10 +9,12 @@ RUN apt-get -qq update && apt-get install -y \
 	libssl1.0.0 \
 	libmysqlclient-dev \
 	libpq-dev \
+	pkg-config \
 	libsqlite3-0 \
 	libevent-dev \
 	libssl-dev \
 	libxml2-dev \
+	libcurl4-openssl-dev \
 	libxslt1-dev \
 	libreadline-dev \
 	build-essential \

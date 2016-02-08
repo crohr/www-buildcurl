@@ -4,6 +4,7 @@ RUN apt-get update -qq && apt-get install -y \
 	git \
 	lsb-release \
 	curl \
+	pkg-config \
 	libssl1.0.0 \
 	libmysqlclient-dev \
 	libpq-dev \

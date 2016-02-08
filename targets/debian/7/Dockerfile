@@ -3,6 +3,7 @@ from debian:7
 RUN apt-get update -qq && apt-get -y install \
 	git \
 	wget \
+	pkg-config \
 	lsb-release \
 	curl \
 	libssl1.0.0 \

@@ -5,6 +5,7 @@ RUN apt-get -qq update && apt-get -y install \
 	wget \
 	lsb-release \
 	curl \
+	pkg-config \
 	libssl1.0.0 \
 	libmysqlclient-dev \
 	libpq-dev \
@@ -15,6 +16,7 @@ RUN apt-get -qq update && apt-get -y install \
 	libxslt1-dev \
 	libreadline-dev \
 	build-essential \
+	libcurl4-openssl-dev \
 	subversion \
 	zip \
 	coreutils \

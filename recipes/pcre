@@ -21,7 +21,7 @@ curl -L ${dep_url} | tar xz
 
 pushd ${dep_dirname}
 ./configure --prefix=${OUT_PREFIX}
-make -s -j 9
+make -s -j ${JOBS:=1}
 make install -s
 popd
 
