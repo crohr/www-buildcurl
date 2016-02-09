@@ -22,6 +22,10 @@ chown -R www-data:www-data /opt/buildcurl
 mkdir -p /opt/buildcurl/cache
 chmod 2777 /opt/buildcurl/cache
 
+test -f /opt/buildcurl/.env || cat > /opt/buildcurl/.env <<EOF
+BUILDCURL_URL=http://$(hostname)
+EOF
+
 rm -f /etc/apache2/sites-enabled/*.conf
 
 cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
@@ -34,4 +38,5 @@ cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
 	</Directory>
 </VirtualHost>
 CONFIG
+
 service apache2 restart
