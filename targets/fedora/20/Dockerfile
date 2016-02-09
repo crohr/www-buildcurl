@@ -24,6 +24,7 @@ RUN yum makecache fast && yum -y install \
   zip \
   file \
   patch \
+	curl-devel \
   && yum clean all
 
 RUN echo "fedora:20" > /etc/version
