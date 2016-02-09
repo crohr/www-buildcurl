@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+targets=(
+	ubuntu:14.04
+	ubuntu:12.04
+	el:6
+	el:7
+	fedora:20
+	debian:7
+	debian:8
+	sles:11
+	sles:12
+)
+
+for target in ${targets[@]}; do
+	docker pull buildcurl/$target
+done
