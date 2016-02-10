@@ -17,12 +17,14 @@ RUN apt-get -qq update && apt-get -y install \
 	libreadline-dev \
 	build-essential \
 	libcurl4-openssl-dev \
+	libicu-dev \
 	subversion \
 	zip \
 	coreutils \
 	tar \
 	autoconf \
 	libbz2-dev \
+	bzip2 \
 	libpng-dev \
 	libjpeg-dev \
 	libfreetype6-dev \

@@ -16,6 +16,7 @@ RUN apt-get -qq update && apt-get install -y \
 	libxml2-dev \
 	libcurl4-openssl-dev \
 	libxslt1-dev \
+	libicu-dev \
 	libreadline-dev \
 	build-essential \
 	subversion \
@@ -24,6 +25,7 @@ RUN apt-get -qq update && apt-get install -y \
 	tar \
 	autoconf \
 	libbz2-dev \
+	bzip2 \
 	libpng-dev \
 	libjpeg-dev \
 	libfreetype6-dev \

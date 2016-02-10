@@ -23,6 +23,8 @@ RUN yum makecache fast && yum -y install \
   file \
   patch \
   bzip2-devel \
+  bzip2 \
+  libicu-devel \
   libpng-devel \
   libjpeg-devel \
   freetype-devel \

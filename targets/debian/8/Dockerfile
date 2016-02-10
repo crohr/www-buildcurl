@@ -11,11 +11,13 @@ RUN apt-get update -qq && apt-get install -y \
 	libsqlite3-0 \
 	libevent-dev \
 	libssl-dev \
+	libcurl4-openssl-dev \
 	libxml2-dev \
 	libxslt1-dev \
 	libreadline-dev \
 	subversion \
 	zip \
+	bzip2 \
 	coreutils \
 	tar \
 	build-essential \
