@@ -23,7 +23,7 @@ mkdir -p /opt/buildcurl/cache
 chmod 2777 /opt/buildcurl/cache
 
 test -f /opt/buildcurl/.env || cat > /opt/buildcurl/.env <<EOF
-BUILDCURL_URL=http://$(hostname)
+BUILDCURL_URL=http://$(curl -s ifconfig.co)
 EOF
 
 rm -f /etc/apache2/sites-enabled/*.conf
