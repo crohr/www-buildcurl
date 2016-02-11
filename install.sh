@@ -10,8 +10,11 @@ EOF
 
 apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' > /etc/apt/sources.list.d/docker.list
+
+echo deb http://apt.newrelic.com/debian/ newrelic non-free > /etc/apt/sources.list.d/newrelic.list
+wget -O- https://download.newrelic.com/548C16BF.gpg | apt-key add -
 apt-get update -qq
-apt-get install -y ruby apache2 curl linux-image-extra-$(uname -r) git htop
+apt-get install -y ruby apache2 curl linux-image-extra-$(uname -r) git htop newrelic-sysmond
 apt-get install -y docker-engine
 a2enmod cgi
 usermod -aG docker www-data
@@ -40,3 +43,8 @@ cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
 CONFIG
 
 service apache2 restart
+
+if [ "$NEWRELIC_KEY" != "" ]; then
+	nrsysmond-config --set license_key=$NEWRELIC_KEY
+	service newrelic-sysmond restart
+fi
