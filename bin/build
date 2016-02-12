@@ -51,6 +51,6 @@ exec docker run --rm -a stdout -a stderr \
 	-e VERSION="$VERSION" \
 	-e BUILDCURL_URL="$BUILDCURL_URL" \
 	-v $SOURCE:/buildcurl:ro \
-	-w /tmp \
+	-w /scratch \
 	"$DOCKER_ORG/$TARGET" \
 	/buildcurl/bin/compile "$RECIPE"

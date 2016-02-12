@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Build Path: /app/.heroku/vendor/
+
+set -e
+set -o pipefail
+
+OUT_PREFIX=$1
+
+VERSION=${VERSION:="1.11.0"}
+dep_dirname="gdal-${VERSION}"
+echo "Building $dep_dirname..."
+
+SOURCE_TARBALL="http://download.osgeo.org/gdal/${VERSION}/$dep_dirname.tar.gz"
+
+curl -L $SOURCE_TARBALL | tar zx
+
+pushd $dep_dirname
+./configure --prefix=$OUT_PREFIX
+make -j ${JOBS:=1}
+make install
+popd
+
+echo "-----> Done."
