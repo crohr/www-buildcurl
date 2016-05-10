@@ -27,18 +27,18 @@ prefix = params.has_key?("prefix") ? params["prefix"].first : "/usr/local"
 recipe_file = File.join(RECIPES_DIR, recipe)
 
 if recipe.nil? || target.nil?
-  cgi.out("status" => 400) do
+  cgi.out("status" => 400, "type" => "text/plain") do
     File.read(File.join(SOURCE, "USAGE.md"))
   end
   exit 0
 end
 
 if recipe.nil? || recipe.empty? || !File.exists?(recipe_file)
-  cgi.out("status" => 400) do
+  cgi.out("status" => 400, "type" => "text/plain") do
     "Invalid recipe '#{recipe}'\n"
   end
 elsif target.nil? || target.empty?
-  cgi.out("status" => 400) do
+  cgi.out("status" => 400, "type" => "text/plain") do
     "Invalid target '#{target}'\n"
   end
 else
