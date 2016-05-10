@@ -1,0 +1,24 @@
+#!/bin/bash
+
+OUT_PREFIX=$1
+
+set -e
+set -o pipefail
+
+VERSION=${VERSION:="5.18.1"}
+PERL_VERSION="perl-${VERSION}"
+PERLBREW_URL="http://install.perlbrew.pl"
+CPANM_URL="http://cpanmin.us"
+
+PERLBREW_ROOT="$OUT_PREFIX"
+PERLBREW_INSTALL_OPTIONS="-Duserelocatableinc -n -v"
+PERL_ROOT="$PERLBREW_ROOT/perls/$PERL_VERSION"
+
+export PERLBREW_ROOT=$PERLBREW_ROOT
+curl -kL $PERLBREW_URL | bash
+source $PERLBREW_ROOT/etc/bashrc
+perlbrew init
+perlbrew install $PERL_VERSION $PERLBREW_INSTALL_OPTIONS
+perlbrew use $PERL_VERSION
+curl -L $CPANM_URL | perl - --self-upgrade
+cpanm local::lib

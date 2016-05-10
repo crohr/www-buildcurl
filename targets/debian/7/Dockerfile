@@ -20,6 +20,7 @@ RUN apt-get update -qq && apt-get -y install \
 	subversion \
 	zip \
 	bzip2 \
+	libtool \
 	coreutils \
 	tar \
 	autoconf \

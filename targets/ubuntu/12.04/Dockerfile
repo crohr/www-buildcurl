@@ -25,6 +25,7 @@ RUN apt-get -qq update && apt-get -y install \
 	autoconf \
 	libbz2-dev \
 	bzip2 \
+	libtool \
 	libpng-dev \
 	libjpeg-dev \
 	libfreetype6-dev \

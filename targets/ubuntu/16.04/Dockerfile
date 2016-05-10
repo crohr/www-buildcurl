@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 RUN apt-get -qq update && apt-get install -y \
 	git \
@@ -32,4 +32,4 @@ RUN apt-get -qq update && apt-get install -y \
 	libfreetype6-dev \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN echo "ubuntu:14.04" > /etc/version
+RUN echo "ubuntu:16.04" > /etc/version

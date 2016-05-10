@@ -1,24 +1,31 @@
 #!/bin/bash
 
+set -e
+
 RECIPE="$1"
 PREFIX=${PREFIX:="/usr/local"}
 SOURCE=${SOURCE:="/opt/buildcurl"}
 PATH=$SOURCE/helpers:$PATH
 
-if [ -z "$LOGGER" ]; then LOGGER=$(mktemp) ; fi
+function finish() {
+	exit $1
+}
+
+if [ -z "$LOGGER" ]; then rm -f /tmp/log; LOGGER=/tmp/log; fi
 
 rm -rf "$PREFIX" && mkdir -p "$PREFIX"
 if [ -f  "$SOURCE/recipes/$RECIPE" ]; then
 	if $SOURCE/recipes/$RECIPE "$PREFIX" &> $LOGGER ; then
 		tar czf - -C "$PREFIX" .
+		finish 0
 	else
 		if [ -f $LOGGER ] ; then
 			echo "-----> BUILD FAILED, please see the details below:"
 			cat $LOGGER
 		fi
-		exit 1
+		finish 1
 	fi
 else
 	echo "UNSUPPORTED RECIPE: $RECIPE"
-	exit 2
+	finish 2
 fi

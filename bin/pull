@@ -3,6 +3,7 @@
 set -e
 
 targets=(
+	ubuntu:16.06
 	ubuntu:14.04
 	ubuntu:12.04
 	el:6

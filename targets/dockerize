@@ -2,6 +2,10 @@
 
 DOCKER_ORG=${DOCKER_ORG:=buildcurl}
 
+USAGE=<<EOF
+e.g. cd targets && ./dockerize ubuntu/14.04/Dockerfile
+EOF
+
 build_docker_image() {
 	file=$1
 	osversiondir=$(dirname $file)

@@ -20,6 +20,7 @@ RUN apt-get update -qq && apt-get install -y \
 	bzip2 \
 	coreutils \
 	tar \
+	libtool \
 	build-essential \
 	autoconf \
 	libbz2-dev \
