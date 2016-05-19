@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -ex
+
+OUT_PREFIX="$1"
+GEM="bundler"
+DEFAULT_VERSION="1.11.2"
+VERSION=${VERSION:-$DEFAULT_VERSION}
+export LANG="en_US.UTF-8"
+export GEM_HOME="$OUT_PREFIX"
+
+PREFIX=/usr/local buildcurl ruby | tar xz -C /usr/local
+
+echo "-----> Building rubygem-$GEM $VERSION..."
+/usr/local/bin/gem install $GEM --version $VERSION --no-ri --no-rdoc --env-shebang
+rm -rf $GEM_HOME/cache/$GEM-$VERSION.gem
+echo "-----> Done."
