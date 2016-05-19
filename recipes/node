@@ -1,0 +1,12 @@
+#!/bin/sh -ex
+
+output_dir=$1
+DEFAULT_VERSION="0.10.30"
+VERSION=${VERSION:-$DEFAULT_VERSION}
+
+echo "-----> Building Node ${VERSION}..."
+curl http://nodejs.org/dist/v$VERSION/node-v$VERSION-linux-x64.tar.gz -s -o - | tar xzf - --strip-components=1 -C "$output_dir"
+rm -f "$output_dir/README.md"
+rm -f "$output_dir/LICENSE"
+rm -f "$output_dir/ChangeLog"
+echo "-----> Done."
