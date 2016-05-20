@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -ex
+set -o pipefail
+
+OUT_PREFIX="$1"
+RUBY_PREFIX="/app/vendor/ruby"
+GEM="pkgr"
+export LANG="en_US.UTF-8"
+export GEM_HOME="$OUT_PREFIX"
+
+mkdir -p $RUBY_PREFIX
+PREFIX=$RUBY_PREFIX buildcurl ruby | tar xz -C $RUBY_PREFIX
+
+echo "-----> Building rubygem-$GEM $VERSION..."
+if [ "${#VERSION}" = "40" ] || [ "${#VERSION}" = "7" ]; then
+	git clone https://github.com/crohr/pkgr.git
+	pushd pkgr
+	git reset --hard "$VERSION"
+	$RUBY_PREFIX/bin/gem build $GEM.gemspec
+	$RUBY_PREFIX/bin/gem install *.gem --no-ri --no-rdoc --env-shebang
+	popd
+else
+	$RUBY_PREFIX/bin/gem install $GEM --version $VERSION --no-ri --no-rdoc --env-shebang
+fi
+rm -rf $GEM_HOME/cache/*.gem
+echo "-----> Done."

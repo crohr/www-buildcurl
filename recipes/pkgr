@@ -1,0 +1,20 @@
+#!/bin/bash
+
+OUT_PREFIX=$1
+
+set -e
+set -o pipefail
+
+echo "-----> Building pkgr ${VERSION}..."
+PREFIX=/app/vendor/ruby buildcurl ruby | tar xz -C $OUT_PREFIX
+
+GEM_HOME="$($OUT_PREFIX/bin/gem env GEM_HOME)"
+pushd "$GEM_HOME"
+buildcurl rubygem-pkgr $VERSION | tar xz -C .
+popd
+
+for bin in $GEM_HOME/bin/* ; do
+	ln -sf $bin $OUT_PREFIX/bin/
+done
+
+echo "-----> Done."

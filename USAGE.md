@@ -43,4 +43,14 @@ Install ruby-2.3.0 for ubuntu:14.04 into /usr/local:
     /usr/local/bin/gem -v
     #=> 2.5.1
 
+## Tips
+
+### Display build log on error
+
+The build log is sent as output if the build fails, so you can just check
+whether the output is a valid gzip file, and display it if that's not the case:
+
+    curl buildcurl.com --get -d recipe=ruby -d target=ubuntu:14.04 -d version=2.3.0 -d prefix=/usr/local -o output.tgz && \
+      gunzip -t ouput.tgz || ( cat output.tgz && exit 1 )
+
 More details at <https://github.com/crohr/buildcurl>.

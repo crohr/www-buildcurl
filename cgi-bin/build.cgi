@@ -53,7 +53,7 @@ else
   ].join("|")
   cache_file = File.join(CACHE_DIR, fingerprint)
 
-  if File.exist?(cache_file)
+  if !(cgi.cache_control || "").downcase.include?("no-cache") && File.exist?(cache_file)
     cgi.print cgi.header({"type" => "application/x-compressed", "status" => "OK"})
     File.open(cache_file, "r").each_line do |line|
       cgi.print line
