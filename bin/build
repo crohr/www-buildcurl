@@ -43,14 +43,13 @@ fi
 
 MAX_CPUS=$(getconf _NPROCESSORS_ONLN)
 
-exec docker run --rm -a stdout -a stderr \
+tar czf - $SOURCE --exclude ./cache | docker run --rm -i -a stdin -a stdout -a stderr \
 	-e JOBS="${JOBS:=$MAX_CPUS}" \
 	-e PREFIX="$PREFIX" \
 	-e LOGGER="$LOGGER" \
-       	-e SOURCE=/buildcurl \
+       	-e SOURCE=/opt/buildcurl \
 	-e VERSION="$VERSION" \
 	-e BUILDCURL_URL="$BUILDCURL_URL" \
-	-v $SOURCE:/buildcurl:ro \
 	-w /scratch \
 	"$DOCKER_ORG/$TARGET" \
-	/buildcurl/bin/compile "$RECIPE"
+	bash -c "tar xzf - -C / && $SOURCE/bin/compile \"$RECIPE\""

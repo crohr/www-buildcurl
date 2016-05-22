@@ -31,3 +31,10 @@ You can install this in 5 minutes on a spare server by doing:
 ```bash
 curl https://raw.githubusercontent.com/crohr/buildcurl/master/install.sh | sudo bash
 ```
+
+Or, using docker:
+
+```bash
+docker run -d --name buildcurl -p 8081:80 -v /var/run/docker.sock:/var/run/docker.sock buildcurl/buildcurl
+```
+

@@ -2,7 +2,7 @@
 
 OUT_PREFIX=$1
 
-set -e
+set -ex
 set -o pipefail
 
 DEFAULT_VERSION="2.0.0-p648"

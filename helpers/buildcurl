@@ -4,7 +4,7 @@ set -e
 
 BUILDCURL_URL=${BUILDCURL_URL:=http://buildcurl.com/}
 
-exec curl -sSL $BUILDCURL_URL -G \
+exec curl -sSL $BUILDCURL_URL -A "buildcurl/internal" --connect-timeout 5 -G \
 	-d "target=$(cat /etc/version)" \
 	-d "prefix=$PREFIX" \
 	-d "recipe=$1" \
