@@ -4,8 +4,10 @@ set -e
 
 BUILDCURL_URL=${BUILDCURL_URL:=http://buildcurl.com/}
 
-exec curl -sSL $BUILDCURL_URL -A "buildcurl/internal" --connect-timeout 5 -G \
-	-d "target=$(cat /etc/version)" \
-	-d "prefix=$PREFIX" \
-	-d "recipe=$1" \
-	-d "version=$2"
+cmd="curl $BUILDCURL_URL --get -A 'buildcurl/internal' --connect-timeout 5 -d target=$(cat /etc/version) -d prefix=$PREFIX -d recipe=$1 -d version=$2"
+
+# display build logs
+$cmd -s -o /dev/stderr
+
+# fetch binary
+exec $cmd -sL --fail -o -

@@ -12,23 +12,20 @@ function finish() {
 	exit $1
 }
 
+indent() {
+	sed -u "s/^/-> [$1] /"
+}
+
 if [ -z "$LOGGER" ]; then rm -f /tmp/log; LOGGER=/tmp/log; fi
 
 rm -rf "$PREFIX" && mkdir -p "$PREFIX"
 if [ -f  "$SOURCE/recipes/$RECIPE" ]; then
-	if $SOURCE/recipes/$RECIPE "$PREFIX" 2>&1 | tee -a $LOGGER 1>&2 ; then
-		if [ -f $LOGGER ] ; then
-			cp $LOGGER "$PREFIX/buildcurl.log"
-		fi
-		tar czf - -C "$PREFIX" .
-		finish 0
-	else
-		if [ -f $LOGGER ] ; then
-			echo "-----> BUILD FAILED, please see the details below:" 1>&2
-			cat $LOGGER 1>&2
-		fi
-		finish 1
+	$SOURCE/recipes/$RECIPE "$PREFIX" 2>&1 | indent "$RECIPE" | tee -a $LOGGER 1>&2
+	if [ -f $LOGGER ] ; then
+		cp $LOGGER "$PREFIX/buildcurl.log"
 	fi
+	tar czf - -C "$PREFIX" .
+	finish 0
 else
 	echo "UNSUPPORTED RECIPE: $RECIPE"
 	finish 2

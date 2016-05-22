@@ -2,7 +2,7 @@
 
 OUT_PREFIX=$1
 
-set -ex
+set -e
 set -o pipefail
 
 DEFAULT_VERSION="2.0.0-p648"
@@ -17,7 +17,7 @@ dep_dirname=ruby-${dep_version}
 dep_archive_name=${dep_dirname}.tar.gz
 dep_url=https://cache.ruby-lang.org/pub/ruby/${major_ruby}/${dep_archive_name}
 
-echo "-----> Building Ruby ${dep_version}..."
+echo "-> Building ruby ${dep_version}..."
 
 buildcurl libyaml 0.1.6 | tar xz -C $OUT_PREFIX
 buildcurl libffi 3.2.1 | tar xz -C $OUT_PREFIX
@@ -35,4 +35,4 @@ CPATH=$OUT_PREFIX/include:$CPATH \
 make install -s
 popd
 
-echo "-----> Done."
+echo "-> DONE"

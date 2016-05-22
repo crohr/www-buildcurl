@@ -5,9 +5,9 @@ OUT_PREFIX=$1
 # fail hard
 set -o pipefail
 # fail harder
-set -eux
+set -eu
 
-echo "Building libffi ${VERSION}..."
+echo "-> Building libffi ${VERSION}..."
 
 tmpdir=$(mktemp -d)
 
@@ -21,4 +21,4 @@ cp -r ${OUT_PREFIX}/lib/libffi-${VERSION}/include ${OUT_PREFIX}/
 popd
 
 rm -rf $tmpdir
-echo "----> Done."
+echo "-> DONE"

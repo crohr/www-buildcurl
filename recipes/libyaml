@@ -5,9 +5,9 @@ OUT_PREFIX=$1
 # fail hard
 set -o pipefail
 # fail harder
-set -eux
+set -eu
 
-echo "Building libyaml ${VERSION}..."
+echo "-> Building libyaml ${VERSION}..."
 
 tmpdir=$(mktemp -d)
 
@@ -19,4 +19,4 @@ make install
 popd
 rm -rf $tmpdir
 
-echo "----> Done."
+echo "-> DONE"

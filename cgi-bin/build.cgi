@@ -53,24 +53,27 @@ else
   ].join("|")
   cache_file = File.join(CACHE_DIR, fingerprint)
 
-  if !(cgi.cache_control || "").downcase.include?("no-cache") && File.exist?(cache_file)
-    cgi.print cgi.header({"type" => "text/plain", "status" => "302", "location" => "/cache/#{fingerprint}"})
+  if ENV['REQUEST_METHOD'] == "HEAD"
+    cgi.print cgi.header({"type" => "text/plain", "status" => "302", "location" => "/cache/#{fingerprint}.tgz", "connection" => "close"})
+  elsif !(cgi.cache_control || "").downcase.include?("no-cache") && File.exist?("#{cache_file}.tgz")
+    cgi.print cgi.header({"type" => "text/plain", "status" => "302", "location" => "/cache/#{fingerprint}.tgz"})
     File.open("#{cache_file}.log", "r").each_line do |line|
       cgi.print line
     end
   else
     STDOUT.sync = true
-    cgi.print cgi.header({"type" => "text/plain", "status" => "302", "location" => "/cache/#{fingerprint}"})
+    cgi.print cgi.header({"type" => "text/plain", "status" => "302", "location" => "/cache/#{fingerprint}.tgz"})
     require 'open3'
     data = {:out => [], :err => []}
     binfile = Tempfile.new("binary")
     logfile = Tempfile.new("log")
     Open3.popen3(cmd) do |stdin, stdout, stderr, thread|
       # read each stream from a new thread
+      stream_threads = []
       { :out => stdout, :err => stderr }.each do |key, stream|
-        Thread.new do
+        stream_threads << Thread.new do
           until (raw_line = stream.gets).nil? do
-            if stream == :out
+            if key == :out
               binfile.print raw_line
             else
               logfile.print raw_line
@@ -81,11 +84,12 @@ else
       end
 
       thread.join # don't exit until the external process is done
+      stream_threads.each(&:join)
       binfile.rewind
       logfile.rewind
       FileUtils.mv logfile.path, "#{cache_file}.log"
       if thread.value.exitstatus == 0
-        FileUtils.mv binfile.path, cache_file
+        FileUtils.mv binfile.path, "#{cache_file}.tgz"
       end
     end
   end
