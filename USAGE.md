@@ -1,10 +1,10 @@
-# BUILDCURL.com
+# buildcurl
 
 Build static binaries on demand.
 
 ## Usage
 
-    curl buildcurl.com --get \
+    curl buildcurl.com -LGfs \
         -d recipe=RECIPE \
         -d target=TARGET \
         -d version=VERSION \
@@ -35,7 +35,7 @@ See <https://github.com/crohr/buildcurl/tree/master/recipes>.
 
 Install ruby-2.3.0 for ubuntu:14.04 into /usr/local:
 
-    curl buildcurl.com --get -d recipe=ruby -d target=ubuntu:14.04 -d version=2.3.0 -d prefix=/usr/local | tar xzf - -C /usr/local
+    curl buildcurl.com -LGfs -d recipe=ruby -d target=ubuntu:14.04 -d version=2.3.0 -d prefix=/usr/local | tar xzf - -C /usr/local
 
     /usr/local/bin/ruby -v
     #=> ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-linux]
@@ -45,12 +45,14 @@ Install ruby-2.3.0 for ubuntu:14.04 into /usr/local:
 
 ## Tips
 
-### Display build log on error
+### Display build log
 
-The build log is sent as output if the build fails, so you can just check
-whether the output is a valid gzip file, and display it if that's not the case:
+The build log is streamed in the first response (which includes a `Location`
+header to redirect to the resulting binary), so if you want to see it, just
+make a first request without the follow redirect option, and then to the same
+one with the `-L` flag:
 
-    curl buildcurl.com --get -d recipe=ruby -d target=ubuntu:14.04 -d version=2.3.0 -d prefix=/usr/local -o output.tgz && \
-      gunzip -t ouput.tgz || ( cat output.tgz && exit 1 )
+    params="-d recipe=ruby -d target=ubuntu:14.04 -d version=2.3.0 -d prefix=/usr/local"
+    curl buildcurl.com -fG $params && curl buildcurl.com -fGL $params
 
 More details at <https://github.com/crohr/buildcurl>.

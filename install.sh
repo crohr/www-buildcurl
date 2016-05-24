@@ -18,6 +18,7 @@ apt-get install -y ruby apache2 curl linux-image-extra-$(uname -r) git htop newr
 apt-get install -y docker-engine
 a2enmod cgi
 usermod -aG docker www-data
+gem install aws-sdk dotenv --no-ri --no-rdoc
 
 mkdir -p /opt
 test -d /opt/buildcurl || git clone https://github.com/crohr/buildcurl.git /opt/buildcurl
@@ -27,20 +28,12 @@ chmod 2777 /opt/buildcurl/cache
 
 test -f /opt/buildcurl/.env || cat > /opt/buildcurl/.env <<EOF
 BUILDCURL_URL=http://$(curl -s ifconfig.co)
+$(env | grep "AWS_")
 EOF
 
 rm -f /etc/apache2/sites-enabled/*.conf
 
-cat > /etc/apache2/sites-enabled/buildcurl.conf <<CONFIG
-<VirtualHost *:80>
-	TimeOut 900
-	ScriptAlias / /opt/buildcurl/cgi-bin/build.cgi
-
-	<Directory /opt/buildcurl/cgi-bin/>
-		Require all granted
-	</Directory>
-</VirtualHost>
-CONFIG
+cp /opt/buildcurl/conf/buildcurl.conf /etc/apache2/sites-enabled/
 
 service apache2 restart
 

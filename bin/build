@@ -5,24 +5,17 @@ contains_element() {
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	return 1
 }
+contains_string() {
+	[ "${2/$1//}" != "$2" ]
+}
 
 DOCKER_ORG=${DOCKER_ORG:=buildcurl}
 SOURCE=${SOURCE:="/opt/buildcurl"}
-ALLOWED_TARGETS=(
-	el:6
-	el:7
-	debian:7
-	debian:8
-	ubuntu:12.04
-	ubuntu:14.04
-	fedora:20
-	sles:11
-	sles:12
-)
+ALLOWED_TARGETS="$(cat $SOURCE/data/targets)"
 TARGET="$1"
 RECIPE="$2"
 
-if ! contains_element "$TARGET" "${ALLOWED_TARGETS[@]}" ; then
+if ! contains_string "$TARGET" "${ALLOWED_TARGETS[@]}" ; then
 	echo "Unknown target: '${TARGET}'. Aborting"
 	exit 2
 fi
@@ -50,6 +43,7 @@ tar czf - $SOURCE -P --exclude ./cache | docker run --rm -i -a stdin -a stdout -
        	-e SOURCE=/opt/buildcurl \
 	-e VERSION="$VERSION" \
 	-e BUILDCURL_URL="$BUILDCURL_URL" \
+	-e NOCACHE="$NOCACHE" \
 	-w /scratch \
 	"$DOCKER_ORG/$TARGET" \
 	bash -c "tar xzf - -P && $SOURCE/bin/compile \"$RECIPE\""

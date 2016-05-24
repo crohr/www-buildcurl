@@ -7,7 +7,11 @@ BUILDCURL_URL=${BUILDCURL_URL:=http://buildcurl.com/}
 cmd="curl $BUILDCURL_URL --get -A 'buildcurl/internal' --connect-timeout 5 -d target=$(cat /etc/version) -d prefix=$PREFIX -d recipe=$1 -d version=$2"
 
 # display build logs
-$cmd -s -o /dev/stderr
+if [ "$NOCACHE" = "true" ]; then
+	$cmd -s -o /dev/stderr -H'Cache-Control: no-cache'
+else
+	$cmd -s -o /dev/stderr
+fi
 
 # fetch binary
 exec $cmd -sL --fail -o -
