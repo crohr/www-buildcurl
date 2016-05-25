@@ -1,3 +1,8 @@
 cache/
 *.tgz
 *.tar.gz
+.env
+targets/
+install.sh
+*.swp
+*.git
