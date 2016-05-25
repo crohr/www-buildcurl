@@ -9,12 +9,25 @@ require 'dotenv'
 require 'open3'
 require 'logger'
 
+class Request
+  attr_reader :cgi
+  def initialize(cgi)
+    @cgi = cgi
+    @sse = (cgi.accept || "").include?("text/event-stream")
+    @browser = (cgi.accept || "").include?("text/html")
+  end
+
+  def sse? ; @sse ; end
+  def browser? ; @browser ; end
+end
+
 SOURCE = ENV.fetch('SOURCE') { File.dirname(Dir.pwd) }
 Dotenv.load File.join(SOURCE, ".env")
 S3 = Aws::S3::Resource.new
 BUCKET = S3.bucket(ENV.fetch('AWS_BUCKET'))
 RECIPES_DIR = File.join(SOURCE, "recipes")
 EXPIRATION_DELAY = 24*3600*30
+TARGETS = File.read(File.join(SOURCE, "data", "targets")).split("\n")
 
 STDOUT.sync = true
 STDERR.sync = true
@@ -29,9 +42,10 @@ prefix = params["prefix"].first
 prefix = "/usr/local" if prefix.nil? || prefix.empty? 
 nocache = params["nocache"].first == "true"
 recipe_file = File.join(RECIPES_DIR, recipe)
+request = Request.new(cgi)
 
 if recipe.nil? || target.nil?
-  if (cgi.accept || "").include?("text/html")
+  if request.browser?
     cgi.print cgi.header({"type" => "text/html", "status" => "200"})
     cgi.print <<EOF
 <html><head>
@@ -64,9 +78,12 @@ if recipe.nil? || recipe.empty? || !File.exists?(recipe_file)
   cgi.out("status" => 400, "type" => "text/plain") do
     "Invalid recipe '#{recipe}'\n"
   end
-elsif target.nil? || target.empty?
+elsif target.nil? || target.empty? || !TARGETS.include?(target)
   cgi.out("status" => 400, "type" => "text/plain") do
-    "Invalid target '#{target}'\n"
+    <<EOF
+Invalid target: #{target.inspect}
+Valid targets include: #{TARGETS.map(&:inspect).join(", ")}
+EOF
   end
 else
   cmd = "env BUILDCURL_URL=#{ENV['BUILDCURL_URL']} SOURCE=#{SOURCE} VERSION='#{version}' PREFIX='#{prefix}' NOCACHE=#{nocache.to_s} #{SOURCE}/bin/build '#{target}' '#{recipe}'"
@@ -86,7 +103,7 @@ else
 
   if ENV['REQUEST_METHOD'] == "HEAD"
     cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz", "connection" => "close"})
-  elsif cgi.accept.include?("text/html")
+  elsif request.browser?
     cgi.print cgi.header({"type" => "text/html", "status" => "200"})
     cgi.print "<html><head>"
     cgi.print <<EOF
@@ -158,8 +175,7 @@ EOF
 EOF
     cgi.print "</body></html>"
   elsif !nocache && BUCKET.object("#{cache_file}.tgz").exists?
-    STDOUT.sync = true
-    if cgi.accept.include?("text/event-stream")
+    if request.sse?
       cgi.print cgi.header({"type" => "text/event-stream", "status" => "200"})
       BUCKET.object("#{cache_file}.log").get.body.each do |line|
         cgi.print "event: log\ndata: #{line}\n\n"
@@ -172,8 +188,7 @@ EOF
       end
     end
   else
-    STDOUT.sync = true
-    if cgi.accept.include?("text/event-stream")
+    if request.sse?
       cgi.print cgi.header({"type" => "text/event-stream", "status" => "200"})
     else
       cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz"})
@@ -190,7 +205,7 @@ EOF
               binfile.print raw_line
             else
               logfile.print raw_line
-              if cgi.accept.include?("text/event-stream")
+              if request.sse?
                 cgi.print "event: log\ndata: #{raw_line}\n\n"
               else
                 cgi.print raw_line
@@ -208,7 +223,7 @@ EOF
       BUCKET.object("#{cache_file}.log").upload_file(logfile.path, acl: "public-read", expires: expires_at.httpdate, content_type: "text/plain")
       if thread.value.exitstatus == 0
         BUCKET.object("#{cache_file}.tgz").upload_file(binfile.path, acl: "public-read", expires: expires_at.httpdate, content_type: "application/x-compressed")
-        cgi.print "event: redirect\ndata: #{cache_file}.tgz\n\n"
+        cgi.print "event: redirect\ndata: #{cache_file}.tgz\n\n" if request.sse?
       end
     end
   end
