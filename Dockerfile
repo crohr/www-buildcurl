@@ -9,7 +9,6 @@ RUN rm -f /etc/apache2/sites-enabled/*.conf
 ADD conf/buildcurl.conf /etc/apache2/sites-enabled/buildcurl.conf
 ADD . /opt/buildcurl
 ADD ./entrypoint.sh /entrypoint.sh
-RUN mkdir -p /opt/buildcurl/cache && chmod 2777 /opt/buildcurl/cache
 WORKDIR /opt/buildcurl
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["-DFOREGROUND"]

@@ -30,7 +30,8 @@ See USAGE.md for more details.
 
 From scratch, on a bare server (this also sets up init scripts, etc.):
 
-    NEWRELIC_KEY=optional AWS_ACCESS_KEY_ID=key AWS_SECRET_ACCESS_KEY=secret AWS_REGION=region AWS_BUCKET=bucket ./install.sh
+    export NEWRELIC_KEY=optional AWS_ACCESS_KEY_ID=key AWS_SECRET_ACCESS_KEY=secret AWS_REGION=region AWS_BUCKET=bucket
+    curl https://raw.githubusercontent.com/crohr/buildcurl/master/install.sh | bash
 
 Or, assuming you already have docker installed and just want to test buildcurl:
 
