@@ -19,7 +19,7 @@ apt-get install -y docker-engine
 
 mkdir -p /etc/buildcurl
 test -f /etc/buildcurl/.env || cat > /etc/buildcurl/.env <<EOF
-BUILDCURL_URL=http://$(curl -s ifconfig.co)
+BUILDCURL_URL=http://$(curl -s v4.ifconfig.co)
 $(env | grep "AWS_")
 EOF
 
