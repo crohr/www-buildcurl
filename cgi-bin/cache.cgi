@@ -5,7 +5,7 @@ require 'aws-sdk'
 require 'dotenv'
 
 SOURCE = ENV.fetch('SOURCE') { File.dirname(Dir.pwd) }
-Dir.chdir(SOURCE) { Dotenv.load }
+Dotenv.load File.join(SOURCE, ".env")
 S3 = Aws::S3::Resource.new
 BUCKET = S3.bucket(ENV.fetch('AWS_BUCKET'))
 CACHE_URL = ENV.fetch('CACHE_URL') { ENV.fetch('BUILDCURL_URL') }

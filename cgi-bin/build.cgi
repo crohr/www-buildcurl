@@ -7,14 +7,18 @@ require 'digest/sha1'
 require 'aws-sdk'
 require 'dotenv'
 require 'open3'
+require 'logger'
 
 SOURCE = ENV.fetch('SOURCE') { File.dirname(Dir.pwd) }
-Dir.chdir(SOURCE) { Dotenv.load }
+Dotenv.load File.join(SOURCE, ".env")
 S3 = Aws::S3::Resource.new
 BUCKET = S3.bucket(ENV.fetch('AWS_BUCKET'))
 RECIPES_DIR = File.join(SOURCE, "recipes")
 EXPIRATION_DELAY = 24*3600*30
 
+STDOUT.sync = true
+STDERR.sync = true
+logger = Logger.new(STDERR)
 cgi = CGI.new
 params = cgi.params
 

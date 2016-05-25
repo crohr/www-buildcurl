@@ -26,15 +26,10 @@ will be cached.
 
 ## Install
 
-You can install this in 5 minutes on a spare server by doing:
-
-```bash
-curl https://raw.githubusercontent.com/crohr/buildcurl/master/install.sh | sudo bash
-```
-
-Or, using docker:
-
-```bash
-docker run -d --name buildcurl -p 8081:80 -v /var/run/docker.sock:/var/run/docker.sock buildcurl/buildcurl
-```
-
+docker run -d --name buildcurl -p 80:80 -v /var/run/docker.sock:/var/run/docker.sock \
+  -e AWS_ACCESS_KEY_ID=key \
+  -e AWS_SECRET_ACCESS_KEY=secret \
+  -e AWS_REGION=us-east-1 \
+  -e AWS_BUCKET=cache.example.com \
+  -e BUILDCURL_URL=http://example.com:80 \
+  buildcurl/buildcurl
