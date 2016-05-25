@@ -1,6 +1,6 @@
 # buildcurl
 
-Build static binaries on demand.
+Precompiled software, built on demand.
 
 ## Usage
 

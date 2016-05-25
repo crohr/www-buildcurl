@@ -1,6 +1,6 @@
 # buildcurl
 
-Statically compiled software, built on demand
+Precompiled software, built on demand.
 
 ## Demo
 
