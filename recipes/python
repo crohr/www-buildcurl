@@ -12,19 +12,16 @@ buildcurl sqlite | tar xz -C $OUT_PREFIX
 VERSION=${VERSION:=2.7.6}
 dep_dirname="Python-$VERSION"
 
-ls -al .
 echo "Building $dep_dirname..."
 SOURCE_TARBALL="https://python.org/ftp/python/$VERSION/$dep_dirname.tgz"
 curl -L $SOURCE_TARBALL | tar xz --strip-components=1
 
-ls -al
-./configure --prefix=$OUT_PREFIX --enable-shared
-# rm -rf python/
+./configure --prefix=$OUT_PREFIX
 make -j ${JOBS:=1}
 make install
-
 if test -f $OUT_PREFIX/bin/python3 ; then
-	ln $OUT_PREFIX/bin/python3 $OUT_PREFIX/bin/python
+	ln -s $OUT_PREFIX/bin/python3 $OUT_PREFIX/bin/python
 fi
+rm -rf $OUT_PREFIX/lib/python*/{__pycache__,test,config-3.5m}
 
 echo "-----> Done."
