@@ -8,6 +8,7 @@ require 'aws-sdk'
 require 'dotenv'
 require 'open3'
 require 'logger'
+require 'erb'
 
 class Request
   attr_reader :cgi
@@ -35,37 +36,25 @@ logger = Logger.new(STDERR)
 cgi = CGI.new
 params = cgi.params
 
-recipe = File.basename(params["recipe"].first || "")
+recipe = params["recipe"].first
 version = params["version"].first
 target = params["target"].first
 prefix = params["prefix"].first
 prefix = "/usr/local" if prefix.nil? || prefix.empty? 
 nocache = params["nocache"].first == "true"
-recipe_file = File.join(RECIPES_DIR, recipe)
+recipe_file = File.join(RECIPES_DIR, recipe || "")
 request = Request.new(cgi)
+
+available_recipes = Dir.glob(File.join(SOURCE, "recipes", "*")).select{|f| File.executable?(f)}.map{|f| File.basename(f)}
+available_targets = TARGETS
 
 if recipe.nil? || target.nil?
   if request.browser?
     cgi.print cgi.header({"type" => "text/html", "status" => "200"})
-    cgi.print <<EOF
-<html><head>
-  <title>buildcurl</title>
-  <style>
-    body{margin:1.5em 1em;}
-    .input{display:inline-block;margin-right:1em;font-family:monospace;font-size:10px;}
-    .input label{margin-right:.5em;}
-  </style>
-  </head><body>
-EOF
-    cgi.print "<form action=/ method=get>"
-    cgi.print "<div class=input><label for=recipe>Recipe:</label><select name=recipe>#{Dir.glob(File.join(SOURCE, "recipes", "*")).select{|f| File.executable?(f)}.map{|t| File.basename(t)}.sort.map{|t| "<option value=#{t} #{"selected" if t == "ruby"}>#{t}</option>"}}</select></div>"
-    cgi.print "<div class=input><label for=version>Version:</label><input type=text name=version placeholder=2.1.3></div>"
-    cgi.print "<div class=input><label for=target>Target:</label><select name=target>#{File.read(File.join(SOURCE, "data", "targets")).split("\n").map{|t| "<option value=#{t}>#{t}</option>"}}</select></div>"
-    cgi.print "<div class=input><label for=prefix>Prefix:</label><input type=text name=prefix placeholder=/usr/local></div>"
-    cgi.print "<input type=submit value=BUILD>"
-    cgi.print "</form>"
+    cgi.print File.read("#{SOURCE}/header.html")
+    cgi.print ERB.new(File.read("#{SOURCE}/_form.html")).result
     cgi.print %x{markdown #{File.join(SOURCE, "USAGE.md")}}
-    cgi.print "</body></html>"
+    cgi.print File.read("#{SOURCE}/footer.html")
   else
     cgi.out("status" => 400, "type" => "text/plain") do
       File.read(File.join(SOURCE, "USAGE.md"))
@@ -105,49 +94,19 @@ else
     cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz", "connection" => "close"})
   elsif request.browser?
     cgi.print cgi.header({"type" => "text/html", "status" => "200"})
-    cgi.print "<html><head>"
-    cgi.print <<EOF
-    <style>
-      body{font-family: monospace;margin-bottom:2em;}
-      #logs p{margin:0}
-      #spinner{position:fixed;right:1em;top:1em;}
-      .hidden{display:none;}
-      .spinner {
-        width: 2em;
-        height: 2em;
-        background-color: #333;
-        -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
-        animation: sk-rotateplane 1.2s infinite ease-in-out;
-      }
-
-      @-webkit-keyframes sk-rotateplane {
-        0% { -webkit-transform: perspective(120px) }
-        50% { -webkit-transform: perspective(120px) rotateY(180deg) }
-        100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
-      }
-
-      @keyframes sk-rotateplane {
-        0% { 
-          transform: perspective(120px) rotateX(0deg) rotateY(0deg);
-          -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg) 
-        } 50% { 
-          transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
-          -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg) 
-        } 100% { 
-          transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
-          -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
-        }
-      }
-    </style>
-EOF
-    cgi.print "</head><body><div class=spinner id=spinner></div>"
-    cgi.print "<h1>#{recipe} #{version} #{target} #{prefix}</h1>"
+    cgi.print File.read("#{SOURCE}/header.html")
+    cgi.print ERB.new(File.read("#{SOURCE}/_form.html")).result
+    cgi.print "<div class=spinner id=spinner></div>"
+    cgi.print "<h1 class=monospace>Building #{recipe} #{version} #{target} #{prefix}...</h1>"
     cgi.print "<div id=logs></div><div id=link class=hidden>Download <a href=/cache/#{fingerprint}.tgz>#{fingerprint}.tgz</a></div>"
     cgi.print <<EOF
     <script>
     var autoscroll = true;
     var src = new EventSource("/?recipe=#{recipe}&target=#{target}&version=#{version}&prefix=#{prefix}&nocache=#{nocache.to_s}");
-    src.onerror = function() { console.log("error"); src.close();}
+    src.onerror = function() {
+      src.close();
+      document.getElementById("spinner").className += " hidden";
+    }
     document.body.onscroll = function() {
       autoscroll = false;
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
@@ -173,7 +132,7 @@ EOF
     });
     </script>
 EOF
-    cgi.print "</body></html>"
+    cgi.print File.read("#{SOURCE}/footer.html")
   elsif !nocache && BUCKET.object("#{cache_file}.tgz").exists?
     if request.sse?
       cgi.print cgi.header({"type" => "text/event-stream", "status" => "200"})

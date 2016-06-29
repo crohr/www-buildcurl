@@ -1,0 +1,7 @@
+<form action=/ method=get id=build>
+  <div class=input><label for=recipe>Recipe:</label><select name=recipe><%= available_recipes.sort.map{|i| "<option value=#{i} #{"selected" if i == (recipe || "ruby")}>#{i}</option>"} %></select></div>
+  <div class=input><label for=version>Version:</label><input type=text name=version value="<%= version %>" placeholder=2.1.3></div>
+  <div class=input><label for=target>Target:</label><select name=target><%= available_targets.map{|i| "<option value=#{i} #{"selected" if i == target}>#{i}</option>"} %></select></div>
+  <div class=input><label for=prefix>Prefix:</label><input type=text name=prefix value="<%= prefix %>" placeholder=/usr/local></div>
+  <input type=submit value=BUILD>
+</form>
