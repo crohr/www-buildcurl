@@ -1,0 +1,12 @@
+#!/bin/bash
+
+OUT_PREFIX=$1
+
+set -e
+set -o pipefail
+
+echo "-----> Building awscli ${VERSION}..."
+buildcurl python 3.5.2 | tar xz -C $OUT_PREFIX
+$OUT_PREFIX/bin/pip3 install awscli==$VERSION
+
+echo "-----> Done."
