@@ -7,6 +7,11 @@ set -o pipefail
 
 DEFAULT_VERSION="2.0.0-p648"
 dep_version=${VERSION:-$DEFAULT_VERSION}
+if [ "$dep_version" = "2.0.0" ]; then
+	dep_version="2.0.0-p648"
+elif [ "$dep_version" = "1.9.3" ]; then
+	dep_version="1.9.3-p551"
+fi
 full_name="ruby-$dep_version"
 version="${dep_version/-*/}"
 name="ruby-$version"
