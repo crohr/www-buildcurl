@@ -22,6 +22,6 @@ make install
 if test -f $OUT_PREFIX/bin/python3 ; then
 	ln -s $OUT_PREFIX/bin/python3 $OUT_PREFIX/bin/python
 fi
-rm -rf $OUT_PREFIX/lib/python*/{__pycache__,test,config-3.5m}
+rm -rf $OUT_PREFIX/lib/python*/{__pycache__,test}
 
 echo "-----> Done."
