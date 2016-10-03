@@ -18,14 +18,15 @@ buildcurl php | tar xz -C $OUT_PREFIX
 
 export PATH=${OUT_PREFIX}/bin:$PATH
 
-rm -rf ${OUT_PREFIX}/*
-mkdir -p ${OUT_PREFIX}/bin
-
 curl -sS https://getcomposer.org/installer | php -- \
   --version=${dep_version} \
   --filename=composer \
   --install-dir=${OUT_PREFIX}/bin
 
 php ${OUT_PREFIX}/bin/composer --version
+mv ${OUT_PREFIX}/bin/composer /tmp/composer
+rm -rf ${OUT_PREFIX}/*
+mkdir -p ${OUT_PREFIX}/bin
+mv /tmp/composer ${OUT_PREFIX}/bin/composer
 
 echo "-----> Done."
