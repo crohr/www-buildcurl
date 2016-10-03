@@ -9,19 +9,24 @@ set -o pipefail
 # fail harder
 set -eux
 
-echo "-----> Bundling Composer (latest)..."
+DEFAULT_VERSION="1.2.0"
+dep_version=${VERSION:-$DEFAULT_VERSION}
+
+echo "-----> Bundling Composer (${dep_version})..."
 
 buildcurl php | tar xz -C $OUT_PREFIX
 
 export PATH=${OUT_PREFIX}/bin:$PATH
 
-curl -sS https://getcomposer.org/installer | php -- --version=1.0.0-alpha10
+curl -sS https://getcomposer.org/installer | php -- \
+  --version=${dep_version} \
+  --filename=composer \
+  --install-dir=${OUT_PREFIX}/bin
 
-php composer.phar --version
-
+php ${OUT_PREFIX}/bin/composer --version
+mv ${OUT_PREFIX}/bin/composer /tmp/composer
 rm -rf ${OUT_PREFIX}/*
 mkdir -p ${OUT_PREFIX}/bin
-
-mv composer.phar ${OUT_PREFIX}/bin/composer
+mv /tmp/composer ${OUT_PREFIX}/bin/composer
 
 echo "-----> Done."
