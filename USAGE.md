@@ -26,6 +26,8 @@ version is specified in the `recipe`, and `prefix` defaults to `/usr/local`.
 * sles:12
 * sles:11
 * fedora:20
+* oraclelinux:6
+* oraclelinux:7
 
 ## Supported recipes
 

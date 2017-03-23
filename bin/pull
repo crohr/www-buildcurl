@@ -13,6 +13,8 @@ targets=(
 	debian:8
 	sles:11
 	sles:12
+	oraclelinux:6
+	oraclelinux:7
 )
 
 for target in ${targets[@]}; do
