@@ -8,3 +8,5 @@ el:6
 fedora:20
 sles:12
 sles:11
+oraclelinux:6
+oraclelinux:7
