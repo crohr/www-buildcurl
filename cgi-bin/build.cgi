@@ -1,10 +1,9 @@
 #!/usr/bin/env ruby
+require 'securerandom'
 require 'time'
 require 'cgi'
 require 'tempfile'
 require 'fileutils'
-require 'digest/sha1'
-require 'aws-sdk'
 require 'dotenv'
 require 'open3'
 require 'logger'
@@ -24,11 +23,6 @@ end
 
 SOURCE = ENV.fetch('SOURCE') { File.dirname(Dir.pwd) }
 Dotenv.load File.join(SOURCE, ".env")
-S3 = Aws::S3::Resource.new
-BUCKET = S3.bucket(ENV.fetch('AWS_BUCKET'))
-RECIPES_DIR = File.join(SOURCE, "recipes")
-EXPIRATION_DELAY = 24*3600*30
-TARGETS = File.read(File.join(SOURCE, "data", "targets")).split("\n")
 
 STDOUT.sync = true
 STDERR.sync = true
@@ -42,11 +36,10 @@ target = params["target"].first
 prefix = params["prefix"].first
 prefix = "/usr/local" if prefix.nil? || prefix.empty? 
 nocache = params["nocache"].first == "true"
-recipe_file = File.join(RECIPES_DIR, recipe || "")
 request = Request.new(cgi)
 
-available_recipes = Dir.glob(File.join(SOURCE, "recipes", "*")).select{|f| File.executable?(f)}.map{|f| File.basename(f)}
-available_targets = TARGETS
+available_targets = File.read(File.join(SOURCE, "data", "targets")).split("\n")
+available_recipes = File.read(File.join(SOURCE, "data", "recipes")).split("\n")
 
 if recipe.nil? || target.nil?
   if request.browser?
@@ -63,36 +56,23 @@ if recipe.nil? || target.nil?
   exit 0
 end
 
-if recipe.nil? || recipe.empty? || !File.exists?(recipe_file)
+if recipe.nil? || recipe.empty?
   cgi.out("status" => 400, "type" => "text/plain") do
     "Invalid recipe '#{recipe}'\n"
   end
-elsif target.nil? || target.empty? || !TARGETS.include?(target)
+elsif target.nil? || target.empty?
   cgi.out("status" => 400, "type" => "text/plain") do
     <<EOF
 Invalid target: #{target.inspect}
-Valid targets include: #{TARGETS.map(&:inspect).join(", ")}
 EOF
   end
 else
-  cmd = "env BUILDCURL_URL=#{ENV['BUILDCURL_URL']} SOURCE=#{SOURCE} VERSION='#{version}' PREFIX='#{prefix}' NOCACHE=#{nocache.to_s} #{SOURCE}/bin/build '#{target}' '#{recipe}'"
-  fingerprint = [
-    recipe,
-    target.sub(":", "-"),
-    version || "default",
-    Digest::SHA1.hexdigest([
-      target,
-      recipe,
-      Digest::SHA1.hexdigest(File.read(recipe_file)),
-      version,
-      prefix
-    ].join("|"))
-  ].join("_")
+  cmd = %{ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null barebuild.com \
+    "compile '#{recipe}' --target='#{target}' --prefix='#{prefix}' --version='#{version}' #{'--no-cache' if nocache}"}
+  fingerprint = SecureRandom.uuid
   cache_file = "cache/#{fingerprint}"
 
-  if ENV['REQUEST_METHOD'] == "HEAD"
-    cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz", "connection" => "close"})
-  elsif request.browser?
+  if request.browser?
     cgi.print cgi.header({"type" => "text/html", "status" => "200"})
     cgi.print File.read("#{SOURCE}/header.html")
     cgi.print ERB.new(File.read("#{SOURCE}/_form.html")).result
@@ -133,19 +113,6 @@ else
     </script>
 EOF
     cgi.print File.read("#{SOURCE}/footer.html")
-  elsif !nocache && BUCKET.object("#{cache_file}.tgz").exists?
-    if request.sse?
-      cgi.print cgi.header({"type" => "text/event-stream", "status" => "200"})
-      BUCKET.object("#{cache_file}.log").get.body.each do |line|
-        cgi.print "event: log\ndata: #{line}\n\n"
-      end
-      cgi.print "event: redirect\ndata: #{cache_file}.tgz\n\n"
-    else
-      cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz"})
-      BUCKET.object("#{cache_file}.log").get.body.each do |line|
-        cgi.print line
-      end
-    end
   else
     if request.sse?
       cgi.print cgi.header({"type" => "text/event-stream", "status" => "200"})
@@ -176,12 +143,10 @@ EOF
 
       thread.join # don't exit until the external process is done
       stream_threads.each(&:join)
-      binfile.rewind
-      logfile.rewind
-      expires_at = (Time.now + EXPIRATION_DELAY)
-      BUCKET.object("#{cache_file}.log").upload_file(logfile.path, acl: "public-read", expires: expires_at.httpdate, content_type: "text/plain")
+      binfile.close
+      logfile.close
+      FileUtils.cp(binfile.path, "/tmp/#{fingerprint}.tgz", verbose: true)
       if thread.value.exitstatus == 0
-        BUCKET.object("#{cache_file}.tgz").upload_file(binfile.path, acl: "public-read", expires: expires_at.httpdate, content_type: "application/x-compressed")
         cgi.print "event: redirect\ndata: #{cache_file}.tgz\n\n" if request.sse?
       end
     end

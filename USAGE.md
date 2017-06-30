@@ -25,15 +25,14 @@ version is specified in the `recipe`, and `prefix` defaults to `/usr/local`.
 * el:7 (CentOS / RHEL 7.x)
 * sles:12
 * sles:11
-* fedora:20
 
 ## Supported recipes
 
-See <https://github.com/crohr/buildcurl/tree/master/recipes>.
+Visit <http://buildcurl.com>.
 
 ## Example
 
-Install ruby-2.3.0 for ubuntu:14.04 into /usr/local:
+Want to get a precompiled ruby-2.3.0 for ubuntu:14.04, to be installed into `/usr/local`?
 
     curl buildcurl.com -LGfs -d recipe=ruby -d target=ubuntu:14.04 -d version=2.3.0 -d prefix=/usr/local | tar xzf - -C /usr/local
 

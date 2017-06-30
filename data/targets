@@ -5,6 +5,5 @@ debian:8
 debian:7
 el:7
 el:6
-fedora:20
 sles:12
 sles:11
