@@ -28,17 +28,9 @@ See USAGE.md for more details.
 
 ## Install
 
-From scratch, on a bare server (this also sets up init scripts, etc.):
+Since buildcurl.com now uses the compilation service at `barebuild.com` (`ssh
+barebuild.com compile ...`), this thing is just a thin wrapper to allow HTTP
+access for the barebuild compilation server (instead of just through SSH).
 
-    export NEWRELIC_KEY=optional AWS_ACCESS_KEY_ID=key AWS_SECRET_ACCESS_KEY=secret AWS_REGION=region AWS_BUCKET=bucket
-    curl https://raw.githubusercontent.com/crohr/buildcurl/master/install.sh | bash
-
-Or, assuming you already have docker installed and just want to test buildcurl:
-
-    docker run -d --name buildcurl -p 80:80 -v /var/run/docker.sock:/var/run/docker.sock \
-      -e AWS_ACCESS_KEY_ID=key \
-      -e AWS_SECRET_ACCESS_KEY=secret \
-      -e AWS_REGION=us-east-1 \
-      -e AWS_BUCKET=cache.example.com \
-      -e BUILDCURL_URL=http://example.com:80 \
-      buildcurl/buildcurl
+It is installed via a debian package available at
+<https://packager.io/gh/crohr/buildcurl>
