@@ -32,6 +32,7 @@ RUN yum makecache fast && yum -y install \
 	automake \
 	libtool \
 	curl-devel \
+	sudo \
 	&& yum clean all
 
 RUN echo "el:7" > /etc/version

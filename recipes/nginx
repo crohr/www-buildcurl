@@ -15,7 +15,7 @@ dep_url=http://nginx.org/download/${dep_archive_name}
 echo "-----> Building Nginx ${dep_version}..."
 
 curl -L ${dep_url} | tar xz
-curl -L http://zlib.net/zlib-1.2.8.tar.gz | tar xz -C ${dep_dirname}
+curl -L http://sourceforge.net/projects/libpng/files/zlib/1.2.8/zlib-1.2.8.tar.gz | tar xz -C ${dep_dirname}
 curl -L http://sourceforge.net/projects/pcre/files/pcre/8.37/pcre-8.37.tar.gz | tar xz -C ${dep_dirname}
 
 pushd ${dep_dirname}

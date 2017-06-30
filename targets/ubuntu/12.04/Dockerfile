@@ -29,6 +29,7 @@ RUN apt-get -qq update && apt-get -y install \
 	libpng-dev \
 	libjpeg-dev \
 	libfreetype6-dev \
+	apt-transport-https \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN echo "ubuntu:12.04" > /etc/version

@@ -27,6 +27,7 @@ RUN apt-get update -qq && apt-get install -y \
 	libpng-dev \
 	libjpeg-dev \
 	libfreetype6-dev \
+	apt-transport-https \
 	&& apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN echo "debian:8" > /etc/version
