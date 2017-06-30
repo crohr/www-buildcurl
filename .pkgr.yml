@@ -1,0 +1,11 @@
+buildpack: https://github.com/pkgr/pkgr-noop-buildpack.git
+dependencies:
+  - apache2
+  - markdown
+  - ruby
+  - openssh-client
+targets:
+  ubuntu-16.04: true
+after_install: packaging/hooks/postinstall.sh
+crons:
+  - packaging/crons/buildcurl-autoupgrade
