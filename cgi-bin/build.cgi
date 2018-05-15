@@ -8,6 +8,9 @@ require 'dotenv'
 require 'open3'
 require 'logger'
 require 'erb'
+require 'shellwords'
+
+include Shellwords
 
 class Request
   attr_reader :cgi
@@ -30,10 +33,10 @@ logger = Logger.new(STDERR)
 cgi = CGI.new
 params = cgi.params
 
-recipe = params["recipe"].first
-version = params["version"].first
-target = params["target"].first
-prefix = params["prefix"].first
+recipe = shellescape(params["recipe"].first)
+version = shellescape(params["version"].first)
+target = shellescape(params["target"].first)
+prefix = shellescape(params["prefix"].first)
 prefix = "/usr/local" if prefix.nil? || prefix.empty? 
 nocache = params["nocache"].first == "true"
 request = Request.new(cgi)
