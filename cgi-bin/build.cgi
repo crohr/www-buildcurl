@@ -33,10 +33,10 @@ logger = Logger.new(STDERR)
 cgi = CGI.new
 params = cgi.params
 
-recipe = shellescape(params["recipe"].first)
-version = shellescape(params["version"].first)
-target = shellescape(params["target"].first)
-prefix = shellescape(params["prefix"].first)
+recipe = params["recipe"].first
+version = params["version"].first
+target = params["target"].first
+prefix = params["prefix"].first
 prefix = "/usr/local" if prefix.nil? || prefix.empty? 
 nocache = params["nocache"].first == "true"
 request = Request.new(cgi)
@@ -70,6 +70,11 @@ Invalid target: #{target.inspect}
 EOF
   end
 else
+  recipe = shellescape(recipe)
+  version = shellescape(version)
+  target = shellescape(target)
+  prefix = shellescape(prefix)
+
   cmd = %{ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null barebuild.com \
     "compile '#{recipe}' --target='#{target}' --prefix='#{prefix}' --version='#{version}' #{'--no-cache' if nocache}"}
   fingerprint = SecureRandom.uuid

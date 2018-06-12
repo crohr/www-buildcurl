@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    health: /health
+    domain:
+      - "*.buildcurl.com"
+    port: 80
+    scale:
+      count: 2
+      memory: 128
+      cpu: 64
