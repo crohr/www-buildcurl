@@ -3,9 +3,10 @@ services:
     build: .
     health: /health
     domain:
+      - "buildcurl.com"
       - "*.buildcurl.com"
     port: 80
     scale:
-      count: 2
-      memory: 128
-      cpu: 64
+      count: 1
+      memory: 64
+      cpu: 256
