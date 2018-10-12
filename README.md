@@ -8,10 +8,10 @@ Do you need ruby-2.3.0 for debian-8, to be installed into `/usr/local`? No probl
 
 ```
 $ curl -GL buildcurl.com \
-  -d recipe=ruby \
-  -d version=2.3.0 \
-  -d target=debian:8 \
-  -d prefix=/usr/local \
+  --data-urlencode recipe=ruby \
+  --data-urlencode version=2.3.0 \
+  --data-urlencode target=debian:8 \
+  --data-urlencode prefix=/usr/local \
   -o - | tar xzf - -C /usr/local/
 ```
 
