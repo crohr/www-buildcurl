@@ -25,6 +25,8 @@ class Request
 end
 
 SOURCE = ENV.fetch('SOURCE') { File.dirname(Dir.pwd) }
+CACHE_BUMP = ENV.fetch("CACHE_BUMP", "v1")
+
 Dotenv.load File.join(SOURCE, ".env")
 
 STDOUT.sync = true
@@ -77,7 +79,11 @@ else
 
   cmd = %{ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null barebuild.com \
     "compile '#{recipe}' --target='#{target}' --prefix='#{prefix}' --version='#{version}' #{'--no-cache' if nocache}"}
-  fingerprint = SecureRandom.uuid
+  fingerprint = if nocache
+                  SecureRandom.uuid
+                else
+                  Digest::SHA1.hexdigest([CACHE_BUMP, recipe, target, prefix, version].compact.join("|"))
+                end
   cache_file = "cache/#{fingerprint}"
 
   if request.browser?

@@ -1,3 +1,5 @@
+environment:
+  - CACHE_BUMP=v1
 services:
   web:
     build: .

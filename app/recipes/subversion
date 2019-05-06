@@ -1,0 +1,99 @@
+#!/bin/bash
+# WARNING: NOT WORKING YET
+OUT_PREFIX=$1
+
+set -o pipefail
+set -ex
+
+VERSION=${VERSION:=1.8.9}
+
+# Disable misc stuff we don't need
+RUBY="none"
+svn_lib_berkeley_db="no"
+svn_have_berkeley_db="no6"
+
+indent() {
+	sed -u 's/^/       /'
+}
+
+DIR=$OUT_PREFIX
+
+buildcurl apache | tar xzf -C $OUT_PREFIX
+
+export LIBRARY_PATH="$DIR/lib:$LIBRARY_PATH"
+
+echo "-----> Building Subversion $VERSION"
+curl --fail --location --silent --output subversion-$VERSION.tar.bz2 http://archive.apache.org/dist/subversion/subversion-$VERSION.tar.bz2
+tar -xjf subversion-$VERSION.tar.bz2
+cd subversion-$VERSION
+
+echo "-----> Downloading Subversion Dependencies"
+./get-deps.sh apr | indent
+./get-deps.sh serf | indent
+./get-deps.sh sqlite | indent
+
+echo "-----> Building APR"
+cd apr
+mkdir install
+./buildconf | indent
+./configure --prefix=$DIR | indent
+make | indent
+make install | indent
+cd ..
+
+cd apr-util
+mkdir install
+./buildconf | indent
+./configure --prefix=$DIR --with-apr=$DIR | indent
+make | indent
+make install | indent
+cd ..
+
+cd apr-util/xml/expat
+mkdir install
+./buildconf.sh | indent
+./configure --prefix=$DIR | indent
+make -j ${JOBS:=1} | indent
+make install | indent
+cd ../../..
+
+echo "-----> Building Serf"
+cd serf
+mkdir install
+./buildconf | indent
+./configure --prefix=$DIR --with-apr=$DIR --with-apr-util=$DIR | indent
+make -j ${JOBS:=1} | indent
+make install | indent
+cd ..
+
+echo "-----> Building Subversion"
+./autogen.sh | indent
+./configure \
+	--disable-bdb6 \
+	--disable-javahl \
+	--disable-keychain \
+	--disable-mod-activation \
+	# --disable-shared \
+	# --enable-all-static \
+	--with-sqlite=$(pwd)/sqlite-amalgamation/sqlite3.c \
+	# --with-apr=$DIR \
+	# --with-apr-util=$DIR \
+	# --with-serf=$DIR \
+	# --without-apxs \
+	--without-berkeley-db \
+	--without-ctypesgen \
+	--without-gnome-keyring \
+	--without-gssapi \
+	--without-kwallet \
+	--without-swig \
+	-C | indent
+
+mkdir -p $OUT_PREFIX/bin
+for binary in subversion/svn/svn subversion/svnmucc/svnmucc subversion/svnadmin/svnadmin ; do
+	make -j ${JOBS:=1} $binary | indent
+	cp $binary $OUT_PREFIX/bin/
+	echo "-----> Testing $(basename $binary)"
+	$OUT_PREFIX/bin/$(basename $binary) --version | indent
+done
+
+echo "------> Done"
