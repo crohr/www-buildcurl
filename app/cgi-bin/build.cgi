@@ -9,6 +9,7 @@ require 'open3'
 require 'logger'
 require 'erb'
 require 'shellwords'
+require 'digest/sha1'
 
 include Shellwords
 
@@ -130,11 +131,10 @@ EOF
   else
     if request.sse?
       cgi.print cgi.header({"type" => "text/event-stream", "status" => "200"})
-    else
-      cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz"})
     end
     binfile = Tempfile.new("binary")
     logfile = Tempfile.new("log")
+    exitstatus = nil
     Open3.popen3(cmd) do |stdin, stdout, stderr, thread|
       # read each stream from a new thread
       stream_threads = []
@@ -147,8 +147,6 @@ EOF
               logfile.print raw_line
               if request.sse?
                 cgi.print "event: log\ndata: #{raw_line}\n\n"
-              else
-                cgi.print raw_line
               end
             end
           end
@@ -159,10 +157,30 @@ EOF
       stream_threads.each(&:join)
       binfile.close
       logfile.close
+      exitstatus = thread.value.exitstatus
+    end
+
+    log = File.read(logfile.path)
+    valid_archive = exitstatus == 0 && system(
+      "tar", "-tzf", binfile.path,
+      :out => File::NULL,
+      :err => File::NULL
+    )
+
+    if valid_archive
       FileUtils.cp(binfile.path, "/tmp/#{fingerprint}.tgz", verbose: true)
-      if thread.value.exitstatus == 0
-        cgi.print "event: redirect\ndata: #{cache_file}.tgz\n\n" if request.sse?
+      if request.sse?
+        cgi.print "event: redirect\ndata: #{cache_file}.tgz\n\n"
+      else
+        cgi.print cgi.header({"type" => "text/plain", "status" => "302", "Location" => "/#{cache_file}.tgz"})
+        cgi.print log
       end
+    elsif request.sse?
+      cgi.print "event: error\ndata: Build failed\n\n"
+    else
+      cgi.print cgi.header({"type" => "text/plain", "status" => "502"})
+      cgi.print log
+      cgi.print "Build failed\n" if log.empty?
     end
   end
 end
